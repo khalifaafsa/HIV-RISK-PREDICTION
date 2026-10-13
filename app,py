@@ -1,41 +1,23 @@
 import streamlit as st
 import joblib
 import pandas as pd
-import numpy as np
 
-# Load model
 model = joblib.load('hiv_risk_model.pkl')
 
-st.title("🩺 HIV Risk Prediction API")
-st.write("Machine learning model to predict HIV risk")
+st.title("🩺 HIV Risk Prediction")
+st.write("Predict HIV risk using ML model")
 
-# Example inputs - change these to your actual features
-# Check your notebook to see what features your model uses
-st.sidebar.header("Enter Patient Details")
-
+st.sidebar.header("Patient Details")
 age = st.sidebar.slider("Age", 15, 70, 25)
-gender = st.sidebar.selectbox("Gender", ["Male", "Female"])
 num_partners = st.sidebar.number_input("Number of Partners", 0, 20, 1)
-condom_use = st.sidebar.selectbox("Condom Use", ["Never", "Sometimes", "Always"])
-prep_adherence = st.sidebar.slider("PrEP Adherence %", 0, 100, 50)
+adherence = st.sidebar.slider("PrEP Adherence %", 0, 100, 50)
 
-if st.button("Predict Risk"):
-    # This is example - REPLACE with your actual model features
-    # Look in your Colab: what columns did you train on?
-    input_data = pd.DataFrame([[age, num_partners, prep_adherence]],
-                              columns=['age', 'num_partners', 'prep_adherence'])
+if st.button("Predict"):
+    data = [[age, num_partners, adherence]]
+    prob = model.predict_proba(data)[0][1]
 
-    # If your model expects more features, add them here
-
-    prediction = model.predict(input_data)[0]
-    probability = model.predict_proba(input_data)[0][1]
-
-    if prediction == 1 or probability > 0.2:
-        st.error(f"⚠️ HIGH RISK - Probability: {probability:.2%}")
+    if prob > 0.2:
+        st.error(f"⚠️ HIGH RISK: {prob:.2%}")
     else:
-        st.success(f"✅ LOW RISK - Probability: {probability:.2%}")
-
-    st.write(f"Threshold used: 0.2")
-
-st.markdown("---")
-st.write("Built by khalifaafsa | Model: hiv_risk_model.pkl")
+        st.success(f"✅ LOW RISK: {prob:.2%}")
+   
